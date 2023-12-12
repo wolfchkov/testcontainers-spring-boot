@@ -36,11 +36,14 @@ public class SetupEnterpriseAerospikeBootstrapConfiguration {
 
     @PostConstruct
     public void setupEnterpriseAerospike() throws IOException, InterruptedException {
-        log.info("Setting up disallow-expunge to true");
+        log.info("Setting up 'disallow-expunge' to true");
         String namespace = aerospikeProperties.getNamespace();
         Container.ExecResult result = aerospikeContainer.execInContainer("asadm", "-e",
                 String.format("enable; manage config namespace %s param disallow-expunge to true", namespace));
-        log.info("Set up disallow-expunge to true: {}", result.getStdout());
+        if (result.getStderr().length() > 0) {
+            throw new IllegalStateException("Failed to set up 'disallow-expunge' to true: " + result.getStderr());
+        }
+        log.info("Set up 'disallow-expunge' to true: {}", result.getStdout());
     }
 
 }
